@@ -1,0 +1,66 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../layouts/Base.astro';
+
+const all = (await getCollection('studia')).sort((a, b) => a.data.order - b.data.order);
+const historie = all.filter((e) => e.data.group === 'historie');
+const materialy = all.filter((e) => e.data.group === 'materialy');
+---
+<Base>
+  <section class="hero">
+    <div class="wrap">
+      <p class="eyebrow">Studium biblijne w małej grupie</p>
+      <h1>Siedem historii, które zmieniają życie</h1>
+      <p class="lead">
+        Proste, sprawdzone plany spotkań dla 3–7 osób. Wystarczy Biblia, notatnik i odrobina odwagi,
+        żeby zacząć — w domu, w pracy albo przy kawie.
+      </p>
+      <div class="hero-actions">
+        <a class="btn" href={`/${historie[0].id}/`}>Zacznij od pierwszej historii</a>
+        <a class="btn btn-ghost" href="/nie-mam-biblii/">Nie mam Biblii</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="historie" class="section">
+    <div class="wrap">
+      <h2>7 historii</h2>
+      <p class="section-lead">Cykl siedmiu spotkań — jedna historia na spotkanie, zawsze według tego samego planu.</p>
+      <ol class="grid">
+        {historie.map((e, i) => (
+          <li>
+            <a class="card" href={`/${e.id}/`}>
+              <div class="card-tile" aria-hidden="true"><span>{i + 1}</span></div>
+              <div class="card-body">
+                <h3>{e.data.title}</h3>
+                {e.data.passage && <p class="muted">{e.data.passage}</p>}
+              </div>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section id="materialy" class="section section-alt">
+    <div class="wrap">
+      <h2>Więcej materiałów</h2>
+      <p class="section-lead">Kolejne cykle i warsztaty dla grup, które chcą iść dalej.</p>
+      <ul class="grid">
+        {materialy.map((e) => (
+          <li>
+            <a class="card" href={`/${e.id}/`}>
+              <div class="card-img">
+                {e.data.image && <img src={e.data.image} alt="" loading="lazy" width="560" height="300" />}
+              </div>
+              <div class="card-body">
+                <h3>{e.data.title}</h3>
+                {e.data.summary && <p class="muted">{e.data.summary}</p>}
+              </div>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,42 @@
+---
+import { getCollection, render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const all = (await getCollection('studia')).sort((a, b) => a.data.order - b.data.order);
+  return all.map((entry) => {
+    const group = all.filter((e) => e.data.group === entry.data.group && e.data.group !== 'page');
+    const i = group.findIndex((e) => e.id === entry.id);
+    return {
+      params: { slug: entry.id },
+      props: { entry, index: i, prev: group[i - 1], next: group[i + 1] },
+    };
+  });
+}
+
+const { entry, index, prev, next } = Astro.props;
+const { Content } = await render(entry);
+const { title, image, passage, summary, group } = entry.data;
+const label = group === 'historie' ? `Historia ${index + 1} z 7` : group === 'materialy' ? 'Materiały' : '';
+---
+<Base title={title} description={summary ?? (passage ? `${title} – plan spotkania. Tekst: ${passage}.` : undefined)} image={image}>
+  <article>
+    <header class="page-hero">
+      <div class="wrap narrow">
+        {label && <p class="eyebrow">{label}</p>}
+        <h1>{title}</h1>
+        {passage && <p class="lead">{passage}</p>}
+        {!passage && summary && <p class="lead">{summary}</p>}
+      </div>
+    </header>
+    <div class="wrap narrow prose">
+      <Content />
+    </div>
+    {(prev || next) && (
+      <nav class="wrap narrow pager" aria-label="Nawigacja">
+        {prev ? <a href={`/${prev.id}/`} class="pager-prev"><span class="muted">← Poprzednia</span>{prev.data.title}</a> : <span />}
+        {next ? <a href={`/${next.id}/`} class="pager-next"><span class="muted">Następna →</span>{next.data.title}</a> : <span />}
+      </nav>
+    )}
+  </article>
+</Base>
